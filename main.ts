@@ -3,6 +3,7 @@ namespace SpriteKind {
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (allowedtocheat == 1) {
+        tiles.placeOnRandomTile(mySprite, assets.tile`whoami`)
         errortrigger = 1
         info.changeCountdownBy(1)
         music.play(music.createSoundEffect(WaveShape.Noise, 3900, 3500, 255, 0, 10, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
@@ -14,6 +15,7 @@ info.onCountdownEnd(function () {
     music.play(music.createSong(assets.song`Loss`), music.PlaybackMode.LoopingInBackground)
     game.gameOver(false)
 })
+let mySprite: Sprite = null
 let errortrigger = 0
 let allowedtocheat = 0
 allowedtocheat = 0
@@ -33,7 +35,7 @@ game.splash("You Get 5 Minutes to Start.", "Find The Clock To Get an extra 10 mi
 game.splash("Good Luck!")
 tiles.setCurrentTilemap(tilemap`level`)
 scene.setBackgroundImage(assets.image`myImage2`)
-let mySprite = Render.getRenderSpriteVariable()
+mySprite = Render.getRenderSpriteVariable()
 let mySprite2 = sprites.create(assets.image`center`, SpriteKind.Player)
 let mySprite3 = sprites.create(assets.image`myImage3`, SpriteKind.Ending)
 let mySprite4 = sprites.create(assets.image`myImage4`, SpriteKind.Food)
