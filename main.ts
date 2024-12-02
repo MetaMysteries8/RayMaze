@@ -58,8 +58,6 @@ game.onUpdate(function () {
 game.onUpdate(function () {
     if (mySprite.overlapsWith(mySprite3)) {
         if (errortrigger == 1) {
-            scene.setBackgroundImage(assets.image`empty`)
-            tiles.setCurrentTilemap(tilemap`blank`)
             sprites.destroy(mySprite3, effects.ashes, 5000)
             info.stopCountdown()
             music.play(music.createSoundEffect(WaveShape.Noise, 1246, 1246, 0, 219, 1000, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
@@ -73,12 +71,14 @@ game.onUpdate(function () {
             color.setPalette(
             color.GrayScale
             )
+            scene.setBackgroundImage(assets.image`empty`)
+            tiles.setCurrentTilemap(tilemap`blank`)
             music.play(music.melodyPlayable(music.smallCrash), music.PlaybackMode.InBackground)
             game.showLongText("Error - Your game has experienced a fatal error and cannot continue functioning. Please Reboot your console.", DialogLayout.Full)
             color.setPalette(
             color.Black
             )
-            pause(5000)
+            pause(60000)
             tiles.setCurrentTilemap(tilemap`whyamihere`)
             tiles.placeOnTile(mySprite, tiles.getTileLocation(0, 0))
             color.startFade(color.Black, color.originalPalette)
