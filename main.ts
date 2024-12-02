@@ -7,6 +7,38 @@ info.onCountdownEnd(function () {
     music.play(music.createSong(assets.song`Loss`), music.PlaybackMode.LoopingInBackground)
     game.gameOver(false)
 })
+controller.A.onEvent(ControllerButtonEvent.Repeated, function () {
+    if (errortrigger == 1) {
+        info.stopCountdown()
+        color.Darken.startScreenEffect(50)
+        color.startFadeFromCurrent(color.SteamPunk, 50)
+        for (let index = 0; index < 10; index++) {
+            music.play(music.createSoundEffect(WaveShape.Noise, 1246, 1246, 219, 219, 5000, SoundExpressionEffect.Tremolo, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
+            pause(100)
+        }
+        color.clearFadeEffect()
+        color.setPalette(
+        color.Black
+        )
+        scene.setBackgroundImage(assets.image`empty`)
+        tiles.setCurrentTilemap(tilemap`blank`)
+        music.stopAllSounds()
+        pause(5000)
+        color.setPalette(
+        color.originalPalette
+        )
+        music.play(music.melodyPlayable(music.smallCrash), music.PlaybackMode.InBackground)
+        game.showLongText("Your game has encountered an error, please press the reload button on your console.", DialogLayout.Center)
+        color.setPalette(
+        color.Black
+        )
+        while (true) {
+            pause(1000)
+        }
+    }
+})
+let errortrigger = 0
+errortrigger = 0
 music.stopAllSounds()
 music.play(music.melodyPlayable(music.spooky), music.PlaybackMode.InBackground)
 music.play(music.createSong(assets.song`Loss`), music.PlaybackMode.LoopingInBackground)
@@ -36,6 +68,7 @@ game.setGameOverEffect(false, effects.slash)
 game.setGameOverMessage(true, "Escape Successful")
 game.setGameOverMessage(false, "You Ran Out Of Time...")
 let mySprite5 = 1
+errortrigger = 1
 game.onUpdate(function () {
     if (mySprite5 == 1) {
         Render.setSpriteAttribute(mySprite4, RCSpriteAttribute.ZPosition, 0)
