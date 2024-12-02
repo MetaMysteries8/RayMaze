@@ -1,41 +1,15 @@
 namespace SpriteKind {
     export const Ending = SpriteKind.create()
 }
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    errortrigger = 1
+    music.play(music.createSoundEffect(WaveShape.Noise, 3900, 3500, 255, 0, 10, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
+})
 info.onCountdownEnd(function () {
     game.setGameOverPlayable(false, music.melodyPlayable(music.sonar), false)
     music.stopAllSounds()
     music.play(music.createSong(assets.song`Loss`), music.PlaybackMode.LoopingInBackground)
     game.gameOver(false)
-})
-controller.A.onEvent(ControllerButtonEvent.Repeated, function () {
-    if (errortrigger == 1) {
-        info.stopCountdown()
-        color.Darken.startScreenEffect(50)
-        color.startFadeFromCurrent(color.SteamPunk, 50)
-        for (let index = 0; index < 10; index++) {
-            music.play(music.createSoundEffect(WaveShape.Noise, 1246, 1246, 219, 219, 5000, SoundExpressionEffect.Tremolo, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
-            pause(100)
-        }
-        color.clearFadeEffect()
-        color.setPalette(
-        color.Black
-        )
-        scene.setBackgroundImage(assets.image`empty`)
-        tiles.setCurrentTilemap(tilemap`blank`)
-        music.stopAllSounds()
-        pause(5000)
-        color.setPalette(
-        color.originalPalette
-        )
-        music.play(music.melodyPlayable(music.smallCrash), music.PlaybackMode.InBackground)
-        game.showLongText("Your game has encountered an error, please press the reload button on your console.", DialogLayout.Center)
-        color.setPalette(
-        color.Black
-        )
-        while (true) {
-            pause(1000)
-        }
-    }
 })
 let errortrigger = 0
 errortrigger = 0
@@ -63,12 +37,12 @@ tiles.placeOnRandomTile(mySprite, assets.tile`spawnpoint`)
 tiles.placeOnTile(mySprite3, tiles.getTileLocation(63, 62))
 tiles.placeOnRandomTile(mySprite4, assets.tile`End`)
 Render.setViewMode(ViewMode.raycastingView)
+Render.setViewAngleInDegree(100)
 info.startCountdown(300)
 game.setGameOverEffect(false, effects.slash)
 game.setGameOverMessage(true, "Escape Successful")
 game.setGameOverMessage(false, "You Ran Out Of Time...")
 let mySprite5 = 1
-errortrigger = 1
 game.onUpdate(function () {
     if (mySprite5 == 1) {
         Render.setSpriteAttribute(mySprite4, RCSpriteAttribute.ZPosition, 0)
@@ -83,13 +57,41 @@ game.onUpdate(function () {
 })
 game.onUpdate(function () {
     if (mySprite.overlapsWith(mySprite3)) {
-        game.setGameOverEffect(true, effects.starField)
-        game.setGameOverPlayable(true, music.melodyPlayable(music.sonar), false)
-        info.stopCountdown()
-        music.stopAllSounds()
-        music.play(music.createSong(assets.song`win`), music.PlaybackMode.LoopingInBackground)
-        game.gameOver(true)
-        game.reset()
+        if (errortrigger == 1) {
+            scene.setBackgroundImage(assets.image`empty`)
+            tiles.setCurrentTilemap(tilemap`blank`)
+            sprites.destroy(mySprite3, effects.ashes, 5000)
+            info.stopCountdown()
+            music.play(music.createSoundEffect(WaveShape.Noise, 1246, 1246, 0, 219, 1000, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
+            color.clearFadeEffect()
+            color.setPalette(
+            color.Black
+            )
+            sprites.destroy(mySprite4)
+            music.stopAllSounds()
+            pause(5000)
+            color.setPalette(
+            color.GrayScale
+            )
+            music.play(music.melodyPlayable(music.smallCrash), music.PlaybackMode.InBackground)
+            game.showLongText("Error - Your game has experienced a fatal error and cannot continue functioning. Please Reboot your console.", DialogLayout.Full)
+            color.setPalette(
+            color.Black
+            )
+            pause(5000)
+            tiles.setCurrentTilemap(tilemap`whyamihere`)
+            tiles.placeOnTile(mySprite, tiles.getTileLocation(0, 0))
+            color.startFade(color.Black, color.originalPalette)
+            music.play(music.createSoundEffect(WaveShape.Noise, 1, 1, 255, 255, 9999, SoundExpressionEffect.Vibrato, InterpolationCurve.Curve), music.PlaybackMode.LoopingInBackground)
+        } else {
+            game.setGameOverEffect(true, effects.starField)
+            game.setGameOverPlayable(true, music.melodyPlayable(music.sonar), false)
+            info.stopCountdown()
+            music.stopAllSounds()
+            music.play(music.createSong(assets.song`win`), music.PlaybackMode.LoopingInBackground)
+            game.gameOver(true)
+            game.reset()
+        }
     }
 })
 forever(function () {
@@ -97,8 +99,8 @@ forever(function () {
 })
 forever(function () {
     if (controller.B.isPressed()) {
-        Render.moveWithController(5, 3, 2)
+        Render.moveWithController(5, 4, 2)
     } else {
-        Render.moveWithController(3, 2, 1)
+        Render.moveWithController(3, 3, 1)
     }
 })
