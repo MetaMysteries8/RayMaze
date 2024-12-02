@@ -3,7 +3,6 @@ namespace SpriteKind {
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (allowedtocheat == 1) {
-        tiles.placeOnRandomTile(mySprite, assets.tile`whoami`)
         errortrigger = 1
         info.changeCountdownBy(1)
         music.play(music.createSoundEffect(WaveShape.Noise, 3900, 3500, 255, 0, 10, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
@@ -15,9 +14,10 @@ info.onCountdownEnd(function () {
     music.play(music.createSong(assets.song`Loss`), music.PlaybackMode.LoopingInBackground)
     game.gameOver(false)
 })
-let mySprite: Sprite = null
+let myspriteexit: Sprite = null
 let errortrigger = 0
 let allowedtocheat = 0
+let errzone = 0
 allowedtocheat = 0
 errortrigger = 0
 music.stopAllSounds()
@@ -35,7 +35,7 @@ game.splash("You Get 5 Minutes to Start.", "Find The Clock To Get an extra 10 mi
 game.splash("Good Luck!")
 tiles.setCurrentTilemap(tilemap`level`)
 scene.setBackgroundImage(assets.image`myImage2`)
-mySprite = Render.getRenderSpriteVariable()
+let mySprite = Render.getRenderSpriteVariable()
 let mySprite2 = sprites.create(assets.image`center`, SpriteKind.Player)
 let mySprite3 = sprites.create(assets.image`myImage3`, SpriteKind.Ending)
 let mySprite4 = sprites.create(assets.image`myImage4`, SpriteKind.Food)
@@ -49,8 +49,8 @@ info.startCountdown(300)
 game.setGameOverEffect(false, effects.slash)
 game.setGameOverMessage(true, "Escape Successful")
 game.setGameOverMessage(false, "You Ran Out Of Time...")
-let mySprite5 = 1
 allowedtocheat = 1
+let mySprite5 = 1
 game.onUpdate(function () {
     if (mySprite5 == 1) {
         Render.setSpriteAttribute(mySprite4, RCSpriteAttribute.ZPosition, 0)
@@ -90,8 +90,12 @@ game.onUpdate(function () {
             pause(60000)
             tiles.setCurrentTilemap(tilemap`whyamihere`)
             tiles.placeOnTile(mySprite, tiles.getTileLocation(0, 0))
-            color.startFade(color.Black, color.originalPalette)
+            myspriteexit = sprites.create(assets.image`error`, SpriteKind.Ending)
+            tiles.placeOnRandomTile(mySprite, assets.tile`err`)
+            tiles.placeOnRandomTile(myspriteexit, assets.tile`myTile`)
+            color.startFade(color.Black, color.originalPalette, 5000)
             music.play(music.createSoundEffect(WaveShape.Noise, 1, 1, 255, 255, 9999, SoundExpressionEffect.Vibrato, InterpolationCurve.Curve), music.PlaybackMode.LoopingInBackground)
+            errzone = 1
         } else {
             game.setGameOverEffect(true, effects.starField)
             game.setGameOverPlayable(true, music.melodyPlayable(music.sonar), false)
@@ -104,7 +108,17 @@ game.onUpdate(function () {
     }
 })
 forever(function () {
-	
+    if (errzone == 1) {
+        myspriteexit.follow(mySprite, 300)
+        myspriteexit.setFlag(SpriteFlag.RelativeToCamera, true)
+        music.play(music.randomizeSound(music.createSoundEffect(WaveShape.Noise, 1, 5000, 255, 0, 1848, SoundExpressionEffect.None, InterpolationCurve.Logarithmic)), music.PlaybackMode.InBackground)
+        sprites.destroy(myspriteexit)
+        while (true) {
+            tiles.setWallAt(tiles.getTileLocation(randint(0, 63), randint(0, 63)), true)
+            tiles.setWallAt(tiles.getTileLocation(randint(0, 63), randint(0, 63)), false)
+            pause(100)
+        }
+    }
 })
 forever(function () {
     if (controller.B.isPressed()) {
