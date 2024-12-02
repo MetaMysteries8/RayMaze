@@ -3,6 +3,7 @@ namespace SpriteKind {
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     errortrigger = 1
+    info.changeCountdownBy(1)
     music.play(music.createSoundEffect(WaveShape.Noise, 3900, 3500, 255, 0, 10, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
 })
 info.onCountdownEnd(function () {
