@@ -11,17 +11,15 @@ An unnecessary WebXR port of the original MakeCode Arcade RayMaze.
 ## Controls
 
 ### WebXR
-- Left stick: move
+- Left stick: move / strafe
 - Right stick: 30-degree snap turn
-- Trigger / grip: sprint
+- Left stick click: sprint
 - Headset: look around
 
 ### FakeVR / Flat
 - WASD: move
 - Mouse: look
 - Shift: sprint
-- Q / E: 30-degree snap turn
-- F: toggle side-by-side stereo
 - R: recenter view (or restart after game over)
 - Esc: return to menu
 
