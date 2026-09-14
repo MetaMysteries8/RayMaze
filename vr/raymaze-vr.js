@@ -216,8 +216,6 @@ function desktopInput(dt) {
   f /= len; s /= len;
   const sy = Math.sin(player.yaw), cy = Math.cos(player.yaw);
   tryMove((sy * f + cy * s) * speed, (-cy * f + sy * s) * speed);
-  if (keys.has("KeyQ")) { keys.delete("KeyQ"); player.yaw -= Math.PI / 6; }
-  if (keys.has("KeyE")) { keys.delete("KeyE"); player.yaw += Math.PI / 6; }
   if (keys.has("KeyR")) { keys.delete("KeyR"); player.yaw = Math.PI * .5; player.pitch = 0; }
 }
 
@@ -230,33 +228,51 @@ function readXRGamepads(dt, pose) {
     const axes = gp.axes || [];
     const ax0 = Math.abs(axes[2] || 0) > Math.abs(axes[0] || 0) ? (axes[2] || 0) : (axes[0] || 0);
     const ay0 = Math.abs(axes[3] || 0) > Math.abs(axes[1] || 0) ? (axes[3] || 0) : (axes[1] || 0);
-    if (src.handedness === "left") { moveX += ax0; moveY += ay0; }
-    else if (src.handedness === "right") turnX += ax0;
-    sprint ||= !!(gp.buttons && (gp.buttons[0]?.pressed || gp.buttons[1]?.pressed));
+    if (src.handedness === "left") {
+      moveX += ax0;
+      moveY += ay0;
+      sprint ||= !!gp.buttons?.[3]?.pressed;
+    } else if (src.handedness === "right") {
+      turnX += ax0;
+    }
   }
+
   if (Math.abs(turnX) > .72) {
     if (!player.snapLatch) { player.yaw += Math.sign(turnX) * Math.PI / 6; player.snapLatch = true; }
   } else if (Math.abs(turnX) < .35) player.snapLatch = false;
 
-  let headYaw = 0;
-  if (pose && pose.transform && pose.transform.orientation) {
-    const q = pose.transform.orientation;
-    headYaw = Math.atan2(2*(q.w*q.y + q.x*q.z), 1 - 2*(q.y*q.y + q.z*q.z));
-  }
-  const yaw = player.yaw + headYaw;
-  const speed = (sprint ? 5.0 : 2.8) * dt;
   const dead = v => Math.abs(v) < .15 ? 0 : v;
-  const sx = dead(moveX), syInput = dead(moveY);
-  tryMove((Math.cos(yaw) * sx + Math.sin(yaw) * -syInput) * speed,
-          (Math.sin(yaw) * sx - Math.cos(yaw) * -syInput) * speed);
+  const strafe = dead(moveX);
+  const forwardInput = -dead(moveY);
+
+  let fx = Math.sin(player.yaw);
+  let fz = -Math.cos(player.yaw);
+
+  // Use the headset's real forward vector instead of guessing yaw from a
+  // quaternion. This keeps locomotion correct even when the head is pitched
+  // or when the runtime uses a different quaternion sign convention.
+  if (pose?.transform?.matrix) {
+    const m = pose.transform.matrix;
+    const localFx = -m[8];
+    const localFz = -m[10];
+    const c = Math.cos(player.yaw);
+    const s = Math.sin(player.yaw);
+    fx = c * localFx - s * localFz;
+    fz = s * localFx + c * localFz;
+    const fl = Math.hypot(fx, fz) || 1;
+    fx /= fl;
+    fz /= fl;
+  }
+
+  const rx = -fz;
+  const rz = fx;
+  const speed = (sprint ? 5.0 : 2.8) * dt;
+  tryMove((fx * forwardInput + rx * strafe) * speed,
+          (fz * forwardInput + rz * strafe) * speed);
 }
 
 window.addEventListener("keydown", e => {
   keys.add(e.code);
-  if (e.code === "KeyF") {
-    stereo = !stereo;
-    showToast(stereo ? "FAKEVR STEREO ON" : "FAKEVR STEREO OFF");
-  }
   if (e.code === "Escape" && mode !== "webxr") menu.classList.remove("hidden");
 });
 window.addEventListener("keyup", e => keys.delete(e.code));
@@ -296,14 +312,19 @@ function mat4RotateY(a) {
   return new Float32Array([c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]);
 }
 function desktopView(xOffset=0) {
-  let m = mat4Multiply(mat4RotateX(-player.pitch), mat4RotateY(-player.yaw));
+  // Camera world rotation is R_y(-yaw), so the inverse/view rotation is
+  // R_y(+yaw). The old code used -yaw here, mirroring the camera relative to
+  // movement and making mouse-look feel backwards.
+  let m = mat4Multiply(mat4RotateX(-player.pitch), mat4RotateY(player.yaw));
   const eyeX = player.x + Math.cos(player.yaw) * xOffset;
   const eyeZ = player.z + Math.sin(player.yaw) * xOffset;
   m = mat4Multiply(m, mat4Translation(-eyeX, -player.y, -eyeZ));
   return m;
 }
 function xrLocomotionMatrix() {
-  let m = mat4RotateY(-player.yaw);
+  // Same sign rule as desktopView: this matrix is part of the VIEW transform,
+  // so body yaw must be inverted relative to the camera's world transform.
+  let m = mat4RotateY(player.yaw);
   m = mat4Multiply(m, mat4Translation(-player.x, 0, -player.z));
   return m;
 }
