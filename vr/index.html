@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050008">
+  <title>RayMaze VR</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <canvas id="gl"></canvas>
+
+  <div id="hud">
+    <div id="timer">05:00</div>
+    <div id="status">RAYMAZE VR</div>
+  </div>
+
+  <div id="menu">
+    <div class="panel">
+      <div class="kicker">MAKECODE ARCADE // UNNECESSARY XR PORT</div>
+      <h1>RAYMAZE <span>VR</span></h1>
+      <p id="xrStatus">Checking WebXR...</p>
+      <div class="buttons">
+        <button id="xrBtn" disabled>ENTER WEBXR</button>
+        <button id="fakeBtn">FAKEVR</button>
+        <button id="flatBtn">FLAT DEBUG</button>
+      </div>
+      <div class="help">
+        <b>Desktop / FakeVR</b><br>
+        WASD move · mouse look · Shift sprint · Q/E snap turn · F toggles stereo · R recenter
+        <br><br>
+        <b>VR</b><br>
+        Left stick move · right stick snap turn · trigger/grip sprint · headset = head
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <script src="./raymaze-vr.js"></script>
+</body>
+</html>
